@@ -1,10 +1,10 @@
 # Handoff 01: Foundation
 
-Status: **code complete and verified locally; waiting on the owner for the account-level steps** (first push approval, Google credentials, Vercel project, Neon database). Nothing has been pushed. See [section 3](#3-what-you-the-owner-must-do-in-order) for the exact steps and [section 7](#7-verification-done-and-what-is-still-open) for what is and is not proven yet.
+Status: **code complete, verified locally and pushed to `main` (owner approved the first push); waiting on the owner for the remaining account-level steps** (Vercel project, Google credentials, Neon database, settings). See [section 3](#3-what-you-the-owner-must-do-in-order) for the exact steps and [section 7](#7-verification-done-and-what-is-still-open) for what is and is not proven yet.
 
 ## 1. What was built
 
-- **Repository**: git initialised on `main`, `origin` set to `https://github.com/oussamabenberkane/flowzone.git` (the remote is empty, so nothing could be overwritten). MIT `LICENSE`, `.gitignore` that ignores every `.env*` file except `.env.example`, `.gitattributes` (LF line endings). Local commits only.
+- **Repository**: git initialised on `main`, `origin` set to `https://github.com/oussamabenberkane/flowzone.git` (the remote is empty, so nothing could be overwritten). MIT `LICENSE`, `.gitignore` that ignores every `.env*` file except `.env.example`, `.gitattributes` (LF line endings). `main` was pushed once, with the owner's approval; the owner's earlier planning files (`agents/`, `assets/`, `AGENT_INTRO_MEDIA.md`) were committed at their request. Repository visibility and settings were not touched.
 - **App**: Next.js 16.4 (App Router, Turbopack), React 19.3, TypeScript strict, ESLint 9 + Prettier. Folder layout is documented in `docs/contracts/foundation.md` section 1.
 - **Settings**: one validated module (`src/server/env.ts`) that stops the app at startup with a clear list of what is wrong (never values). `.env.example` documents every variable.
 - **Database**: Drizzle ORM on Postgres through the standard `pg` driver (works with Neon and with any self-hosted Postgres). First migration (`drizzle/0000_auth_tables.sql`) creates only the four auth tables. `npm run db:migrate` works locally; on Vercel `npm run vercel-build` migrates before building.
@@ -28,7 +28,7 @@ Useful: `npm run db:generate` (new migration from schema changes), `npm run db:s
 
 Do not paste any secret into a chat or a file in the repository. Secrets go only into Vercel's Environment Variables page and your own `.env.local`.
 
-**Step 1. Approve the first push.** Reply with an explicit go-ahead. The agent will then run `git push -u origin main`. Before you do, decide about the files that were already in the folder and that I did **not** commit: `agents/`, `assets/` and `AGENT_INTRO_MEDIA.md` (planning briefs and media). They would become public once the repository is public, so tell me if you want any of them committed (and whether the repository will be public or private).
+**Step 1. First push: done.** Approved by the owner and pushed (`main` on GitHub matches the local `main`). The planning files that were already in the folder (`agents/`, `assets/`, `AGENT_INTRO_MEDIA.md`) were committed at the owner's request, so they are visible to anyone who can see the repository. Later pushes still need the owner's explicit go-ahead.
 
 **Step 2. Create the Vercel project** (vercel.com, Hobby plan). Add New → Project → import `oussamabenberkane/flowzone` (allow Vercel's GitHub app to see it). Leave the framework as Next.js and the build settings at their defaults (Vercel automatically uses the `vercel-build` script). Press Deploy. **The first deployment is expected to fail** with "FlowZone cannot start: the environment is not configured correctly", because the settings do not exist yet. Then open Settings → Domains and note your production address (`https://<name>.vercel.app`). You need it in step 3.
 
