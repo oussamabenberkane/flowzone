@@ -9,3 +9,9 @@
  * Use relative imports only: drizzle-kit loads these files in plain Node.
  */
 export * from "./auth";
+export * from "./projects";
+export * from "./tasks";
+export * from "./recurrence-records";
+export * from "./entries";
+export * from "./day-plans";
+export * from "./settings";
