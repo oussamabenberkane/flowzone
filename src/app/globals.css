@@ -1,100 +1,1009 @@
 /*
- * PLACEHOLDER styles for the Foundation skeleton.
- * Frontend Core replaces this with the real design system (tokens, themes, motion).
+ * The River design system: tokens, themes, base styles and shared components.
+ * Documented in docs/contracts/design-system.md. Change values here, not in components.
+ *
+ * Rules that keep this file honest:
+ * - Colours, sizes, spacing, radii and motion are tokens on :root. Components use tokens only.
+ * - Font sizes are rem, so the browser's text size and the in-app text size both scale everything.
+ * - Dark mode follows the system setting. The in-app overrides are data attributes on <html>.
+ * - Class names start with `fz-` so they never collide with anything else.
  */
+
+/* ---------- 1. Tokens: light (default) ---------- */
 :root {
   color-scheme: light dark;
-  --background: #fbfaf8;
-  --foreground: #1f2933;
-  --muted: #5f6c7b;
-  --accent: #2f6f6b;
-  --accent-contrast: #ffffff;
-  --border: #d9d6cf;
+
+  /* Colour. Named after the river. */
+  --paper: #edf2ee; /* the shallows: page background */
+  --surface: #f8fbf8; /* cards, fields, sheets */
+  --eddy: #e7e1d0; /* the quiet pool where tasks rest: pebble sand */
+  --ink: #17292b; /* main text: deep river teal */
+  --ink-soft: #3f5657; /* secondary text */
+  --river: #1f6266; /* primary action and selection */
+  --river-contrast: #ffffff; /* text on --river */
+  --river-wash: #d3e5e2; /* selected or current background */
+  --moss: #3f7046; /* completed leaves, positive marks */
+  --pebble: #8a6f3e; /* the eddy's accent, and the focus leaf */
+  --line: #bfcbc6; /* hairlines for fields and separators */
+  --focus: #0b4f7a; /* keyboard focus ring */
+  --scrim: rgb(14 28 30 / 0.42);
+  --shadow-sheet: 0 18px 48px rgb(14 28 30 / 0.22);
+
+  /* Type. Newsreader is the voice for headings; Atkinson Hyperlegible Next runs the interface. */
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-atkinson), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.4rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --leading-body: 1.55;
+  --leading-heading: 1.2;
+
+  /* Spacing on a 4px base. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Shape. Leaves are drawn, not rounded; these radii are for the chrome. */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Touch: nothing you can tap is smaller than this. */
+  --touch: 44px;
+
+  /* Motion. One orchestrated moment (a leaf drifting away) and quiet transitions elsewhere. */
+  --ease-calm: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-quick: 160ms;
+  --dur-drift: 520ms;
+
+  /* Layout. */
+  --rail-width: 15rem;
+  --content-max: 40rem;
+  --nav-height: 4.25rem;
+  --header-height: 3.5rem;
 }
 
+/* ---------- 2. Tokens: dark, following the system ---------- */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #14181c;
-    --foreground: #e6e9ec;
-    --muted: #9aa5b1;
-    --accent: #5fb3ad;
-    --accent-contrast: #0f1417;
-    --border: #2b333a;
+  :root:not([data-theme="light"]) {
+    --paper: #0f1a1c;
+    --surface: #162527;
+    --eddy: #1f2a25;
+    --ink: #e3ece8;
+    --ink-soft: #a9bbb6;
+    --river: #7fc4c1;
+    --river-contrast: #0c1718;
+    --river-wash: #22393b;
+    --moss: #9bcb91;
+    --pebble: #d2bc8c;
+    --line: #3a4f51;
+    --focus: #9fd8ff;
+    --scrim: rgb(0 0 0 / 0.55);
+    --shadow-sheet: 0 18px 48px rgb(0 0 0 / 0.5);
   }
 }
 
-* {
+:root[data-theme="dark"] {
+  --paper: #0f1a1c;
+  --surface: #162527;
+  --eddy: #1f2a25;
+  --ink: #e3ece8;
+  --ink-soft: #a9bbb6;
+  --river: #7fc4c1;
+  --river-contrast: #0c1718;
+  --river-wash: #22393b;
+  --moss: #9bcb91;
+  --pebble: #d2bc8c;
+  --line: #3a4f51;
+  --focus: #9fd8ff;
+  --scrim: rgb(0 0 0 / 0.55);
+  --shadow-sheet: 0 18px 48px rgb(0 0 0 / 0.5);
+}
+
+/* ---------- 3. Accessibility overrides (set on <html> by the in-app controls) ---------- */
+
+/* Text size: every size is rem, so these scale the whole interface. */
+:root[data-text-size="larger"] {
+  font-size: 112.5%;
+}
+:root[data-text-size="largest"] {
+  font-size: 125%;
+}
+
+/* Dyslexia-friendly font: Lexend for body text, a little more space between letters and lines. */
+:root[data-font="dyslexia"] {
+  --font-body: var(--font-lexend), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --leading-body: 1.7;
+}
+:root[data-font="dyslexia"] body {
+  letter-spacing: 0.02em;
+  word-spacing: 0.06em;
+}
+
+/* Less motion: an in-app choice, on top of the system setting. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="more"]) {
+    --dur-quick: 0ms;
+    --dur-drift: 0ms;
+  }
+}
+:root[data-motion="less"] {
+  --dur-quick: 0ms;
+  --dur-drift: 0ms;
+}
+
+/* ---------- 4. Base ---------- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  line-height: 1.5;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.page {
-  display: grid;
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-heading);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+h1 {
+  font-size: var(--text-3xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--river);
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.fz-skip {
+  position: absolute;
+  left: var(--space-4);
+  top: var(--space-2);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--river);
+  color: var(--river-contrast);
+  transform: translateY(-200%);
+}
+.fz-skip:focus {
+  transform: none;
+}
+
+.fz-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.fz-muted {
+  color: var(--ink-soft);
+}
+
+/* ---------- 5. App shell ---------- */
+.fz-shell {
   min-height: 100dvh;
-  place-items: center;
-  padding: 24px 16px;
 }
 
-.card {
+.fz-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--header-height);
+  padding: var(--space-2) var(--space-4);
+  padding-top: calc(var(--space-2) + env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.fz-wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--river);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  margin-right: auto;
+}
+
+.fz-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.fz-main {
   width: 100%;
-  max-width: 28rem;
-  padding: 28px 24px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  text-align: center;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4)
+    calc(var(--nav-height) + var(--space-10) + env(safe-area-inset-bottom));
 }
 
-.card h1 {
-  margin: 0 0 8px;
-  font-size: 1.5rem;
+/* The one navigation: a fixed bottom bar on phones, a side rail on wide screens (see below). */
+.fz-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
 }
 
-.muted {
-  color: var(--muted);
+.fz-nav-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.notice {
-  margin: 16px 0;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  text-align: left;
+.fz-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--touch);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+.fz-nav a[aria-current="page"] {
+  color: var(--river);
+  background: var(--river-wash);
 }
 
-.button {
-  min-height: 44px;
-  padding: 10px 20px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--accent);
-  color: var(--accent-contrast);
+.fz-rail-brand {
+  display: none;
+}
+
+.fz-sync {
+  margin: 0 auto var(--space-3);
+  max-width: var(--content-max);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--river-wash);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  width: fit-content;
+}
+
+@media (min-width: 60rem) {
+  .fz-shell {
+    display: grid;
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  }
+  .fz-nav {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    padding: var(--space-4) var(--space-3);
+    border-top: 0;
+    border-right: 1px solid var(--line);
+  }
+  .fz-rail-brand {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    color: var(--river);
+    padding: var(--space-3) var(--space-3) var(--space-4);
+  }
+  .fz-nav-list {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+  .fz-nav a {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-3);
+    font-size: var(--text-base);
+    padding: var(--space-2) var(--space-3);
+  }
+  .fz-main {
+    padding-bottom: var(--space-12);
+  }
+  .fz-topbar {
+    position: sticky;
+  }
+  .fz-topbar .fz-wordmark {
+    display: none;
+  }
+}
+
+/* ---------- 6. Type helpers ---------- */
+.fz-screen-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+.fz-screen-title p {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.fz-section {
+  margin-top: var(--space-8);
+}
+.fz-section > h2 {
+  margin-bottom: var(--space-3);
+}
+
+.fz-stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.fz-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ---------- 7. Buttons ---------- */
+.fz-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch);
+  padding: var(--space-2) var(--space-5);
+  border: 1.5px solid var(--river);
+  border-radius: var(--radius-pill);
+  background: var(--river);
+  color: var(--river-contrast);
   font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease-calm);
+}
+.fz-button:hover {
+  filter: brightness(1.06);
+}
+.fz-button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.fz-button--quiet {
+  background: transparent;
+  color: var(--river);
+  border-color: transparent;
+}
+.fz-button--line {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.fz-button--soft {
+  background: var(--eddy);
+  color: var(--ink);
+  border-color: transparent;
+}
+.fz-button--small {
+  min-height: var(--touch);
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+.fz-button--danger {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.fz-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.fz-icon-button:hover {
+  background: var(--river-wash);
+}
+
+/* ---------- 8. Fields ---------- */
+.fz-field {
+  display: grid;
+  gap: var(--space-1);
+}
+.fz-field > label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+.fz-field .fz-hint {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+.fz-input {
+  width: 100%;
+  min-height: var(--touch);
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+}
+textarea.fz-input {
+  min-height: 7rem;
+  resize: vertical;
+}
+.fz-input:focus {
+  outline: none;
+  border-color: var(--river);
+  box-shadow: 0 0 0 3px var(--river-wash);
+}
+.fz-input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+
+/* Choice pills (radio buttons styled as pills, still native and keyboard friendly). */
+.fz-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.fz-choices legend {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  padding: 0;
+}
+.fz-choice {
+  position: relative;
+}
+.fz-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.fz-choice span {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
 }
-
-.button:disabled {
-  opacity: 0.6;
-  cursor: progress;
+.fz-choice input:checked + span {
+  background: var(--river);
+  border-color: var(--river);
+  color: var(--river-contrast);
+}
+.fz-choice input:focus-visible + span {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
 }
 
-.button.secondary {
-  border: 1px solid var(--border);
+.fz-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--touch);
+  font-weight: 600;
+  cursor: pointer;
+}
+.fz-toggle input {
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--river);
+  margin: 0;
+}
+
+/* ---------- 9. Cards, eddy and empty states ---------- */
+.fz-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.fz-eddy {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--eddy);
+}
+.fz-eddy h2 {
+  margin-bottom: var(--space-1);
+}
+.fz-eddy p {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.fz-empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-2);
+  color: var(--ink-soft);
+}
+.fz-empty h2,
+.fz-empty h3 {
+  color: var(--ink);
+}
+
+.fz-notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--eddy);
+  font-size: var(--text-sm);
+}
+
+/* ---------- 10. Task rows and leaves ---------- */
+.fz-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fz-task {
+  display: grid;
+  grid-template-columns: var(--touch) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  border-radius: var(--radius);
+}
+.fz-task:hover {
+  background: var(--river-wash);
+}
+.fz-task-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-2) 0;
+}
+
+/* Row controls (reorder, take off, focus). On narrow phones they move to their own line, under
+   the title, so the title keeps the width it needs. */
+.fz-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: nowrap;
+}
+@media (max-width: 29.99rem) {
+  .fz-task {
+    grid-template-columns: var(--touch) minmax(0, 1fr);
+  }
+  .fz-task-actions {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: calc(var(--space-1) * -1);
+    padding-bottom: var(--space-1);
+  }
+}
+.fz-task-body a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.fz-task-body a:hover {
+  text-decoration: underline;
+}
+.fz-task-meta {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+.fz-task-note {
+  color: var(--pebble);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.fz-task.is-done .fz-task-body a {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+/* The leaf is the checkbox. It becomes a pebble when done. */
+.fz-leaf {
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: var(--foreground);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+.fz-leaf svg {
+  width: 1.9rem;
+  height: 1.9rem;
+  overflow: visible;
+  transition: transform var(--dur-drift) var(--ease-calm);
+}
+.fz-leaf .fz-leaf-body {
+  fill: var(--surface);
+  stroke: var(--moss);
+  stroke-width: 1.6;
+}
+.fz-leaf .fz-leaf-vein {
+  fill: none;
+  stroke: var(--moss);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.fz-leaf.is-active .fz-leaf-body {
+  fill: var(--moss);
+}
+.fz-leaf.is-active .fz-leaf-vein {
+  stroke: var(--surface);
+}
+.fz-leaf.is-done .fz-leaf-body {
+  fill: var(--pebble);
+  stroke: var(--pebble);
+}
+.fz-leaf.is-done .fz-leaf-vein {
+  display: none;
+}
+.fz-leaf.is-drifting svg {
+  transform: translate(10rem, -1.5rem) rotate(28deg);
+  opacity: 0;
+}
+
+.fz-task.is-drifting {
+  opacity: 0;
+  transform: translateX(3rem);
+  transition:
+    opacity var(--dur-drift) var(--ease-calm),
+    transform var(--dur-drift) var(--ease-calm);
+}
+
+/* ---------- 11. Sheets (native dialog) and toasts ---------- */
+.fz-sheet {
+  width: min(100vw - 1.5rem, 34rem);
+  max-height: min(88dvh, 52rem);
+  margin: auto auto 0;
+  padding: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sheet);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.fz-sheet::backdrop {
+  background: var(--scrim);
+}
+.fz-sheet[open] {
+  animation: fz-sheet-up var(--dur-quick) var(--ease-calm);
+}
+.fz-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.fz-sheet-body {
+  display: grid;
+  gap: var(--space-4);
+}
+.fz-sheet-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .fz-sheet {
+    margin: auto;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@keyframes fz-sheet-up {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.fz-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-height) + var(--space-4) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 40;
+  display: grid;
+  gap: var(--space-2);
+  width: min(100vw - 2rem, 28rem);
+  pointer-events: none;
+}
+@media (min-width: 60rem) {
+  .fz-toasts {
+    bottom: var(--space-6);
+  }
+}
+.fz-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--shadow-sheet);
+  font-size: var(--text-sm);
+}
+.fz-toast button {
+  margin-left: auto;
+  min-height: var(--touch);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--river);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+:root[data-theme="dark"] .fz-toast button,
+:root:not([data-theme="light"]) .fz-toast button {
+  color: var(--river);
+}
+
+/* ---------- 12. Focus screen ---------- */
+.fz-focus {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-5);
+  padding-top: var(--space-4);
+  text-align: center;
+}
+.fz-focus-leaf {
+  width: min(70vw, 14rem);
+}
+.fz-focus-leaf svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.fz-focus-leaf .fz-leaf-body {
+  fill: var(--surface);
+  stroke: var(--moss);
+  stroke-width: 1.2;
+}
+.fz-focus-leaf .fz-leaf-vein {
+  stroke: var(--moss);
+  stroke-width: 1.2;
+  fill: none;
+  stroke-linecap: round;
+}
+
+/* A slot adds no box of its own: whatever it holds lays out as if the slot were not there. */
+.fz-slot {
+  display: contents;
+}
+
+/* A whole row that links somewhere (a project, a note). */
+.fz-link-row {
+  display: grid;
+  gap: 2px;
+  min-height: var(--touch);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--ink);
+  text-decoration: none;
+  align-content: center;
+}
+.fz-link-row:hover {
+  background: var(--river-wash);
+}
+
+.fz-focus-step {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-heading);
+  max-width: 24ch;
+}
+.fz-timer {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+/* ---------- 13. Plan, reflection and the lists of Today ---------- */
+.fz-energy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.fz-greeting {
+  color: var(--ink-soft);
+  font-size: var(--text-base);
+  margin-top: var(--space-1);
+}
+
+.fz-plan-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.fz-reorder {
+  display: flex;
+  gap: 0;
+}
+.fz-reorder .fz-icon-button {
+  width: 2.5rem;
+  height: var(--touch);
+}
+
+.fz-fresh-item {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.fz-fresh-item:first-of-type {
+  border-top: 0;
+}
+
+/* ---------- 14. Forms in a row ---------- */
+.fz-two {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+@media (min-width: 30rem) {
+  .fz-two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- 15. Sign-in (signed-out page) ---------- */
+.fz-signin {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+.fz-signin-card {
+  width: 100%;
+  max-width: 26rem;
+  display: grid;
+  gap: var(--space-5);
+  text-align: left;
+}
+.fz-signin-card h1 {
+  color: var(--river);
+  font-size: var(--text-3xl);
+}
+
+/* ---------- 16. Motion for the Today stream ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="less"]) .fz-stream-enter {
+    animation: fz-stream-enter var(--dur-drift) var(--ease-calm) both;
+  }
+}
+@keyframes fz-stream-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Make sure nothing that moves can keep moving when motion is off. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+:root[data-motion="less"] *,
+:root[data-motion="less"] *::before,
+:root[data-motion="less"] *::after {
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
 }

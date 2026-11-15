@@ -4,8 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { NOT_ALLOWED_ERROR_CODES, SIGN_IN_PATH } from "@/shared/auth";
 import { authClient } from "./auth-client";
+import { Button, Notice } from "./primitives";
 
-/** PLACEHOLDER sign-in UI. Frontend Core replaces the look; keep the behaviour. */
+/** Sign-in with Google. The behaviour is Foundation's; this is the River look of it. */
 export function SignInPanel() {
   const errorCode = useSearchParams().get("error");
   const [pending, setPending] = useState(false);
@@ -31,21 +32,21 @@ export function SignInPanel() {
   }
 
   return (
-    <>
-      {notAllowed && (
-        <p className="notice" role="alert">
+    <div className="fz-stack" style={{ gap: "var(--space-4)" }}>
+      {notAllowed ? (
+        <Notice role="alert">
           That Google account isn&apos;t on the invite list yet. FlowZone is private for now. You
           can try a different Google account.
-        </p>
-      )}
-      {otherError && !notAllowed && (
-        <p className="notice" role="alert">
+        </Notice>
+      ) : null}
+      {otherError && !notAllowed ? (
+        <Notice role="alert">
           We couldn&apos;t sign you in just now. Please try again in a moment.
-        </p>
-      )}
-      <button type="button" className="button" onClick={signIn} disabled={pending}>
+        </Notice>
+      ) : null}
+      <Button onClick={() => void signIn()} disabled={pending} data-testid="sign-in-google">
         {pending ? "Opening Google…" : "Continue with Google"}
-      </button>
-    </>
+      </Button>
+    </div>
   );
 }
