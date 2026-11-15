@@ -1,0 +1,38 @@
+# Calls FlowZone's nudge tick every 30 minutes. Contract: docs/contracts/nudges.md, section 2.
+# Scheduled runs are "about when", not exact: GitHub may delay them, especially at busy times.
+# Secrets the owner must add (Settings > Secrets and variables > Actions):
+#   NUDGE_TICK_SECRET  the same value as NUDGE_TICK_SECRET in the app's environment (at least 32 characters)
+# Variable the owner must add (Settings > Secrets and variables > Actions > Variables):
+#   FLOWZONE_APP_URL   the production address of the app, for example https://your-domain (no trailing slash)
+name: nudges-tick
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nudges-tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the nudge tick
+        env:
+          APP_URL: ${{ vars.FLOWZONE_APP_URL }}
+          TICK_SECRET: ${{ secrets.NUDGE_TICK_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$TICK_SECRET" ]; then
+            echo "Set the FLOWZONE_APP_URL variable and the NUDGE_TICK_SECRET secret first."
+            exit 1
+          fi
+          curl --silent --show-error --fail-with-body --max-time 240 \
+            -X POST \
+            -H "x-flowzone-tick-secret: ${TICK_SECRET}" \
+            "${APP_URL}/api/nudges/tick"
