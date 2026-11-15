@@ -15,3 +15,5 @@ export * from "./recurrence-records";
 export * from "./entries";
 export * from "./day-plans";
 export * from "./settings";
+export * from "./ai";
+export * from "./nudges";

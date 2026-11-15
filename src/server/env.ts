@@ -53,6 +53,29 @@ const schema = z.object({
   ALLOWED_EMAILS: z.preprocess(blankToUndefined, z.string().min(1, "is required")),
 
   ENABLE_TEST_LOGIN: z.preprocess(blankToUndefined, z.enum(["true", "false"]).default("false")),
+
+  // AI provider (see docs/contracts/ai.md). "none" turns the AI off for the whole app.
+  AI_PROVIDER: z.preprocess(
+    blankToUndefined,
+    z.enum(["none", "groq", "mistral", "openrouter", "standin"]).default("none"),
+  ),
+  AI_API_KEY: optionalString,
+  AI_MODEL: optionalString,
+  AI_DAILY_REQUEST_LIMIT: z.preprocess(
+    blankToUndefined,
+    z.coerce.number().int().min(0).max(10_000).default(30),
+  ),
+
+  // Nudges and web push (see docs/contracts/nudges.md). Every one is optional: without them
+  // the app runs and nudges simply do not go out.
+  NUDGE_TICK_SECRET: z.preprocess(
+    blankToUndefined,
+    z.string().min(32, "must be at least 32 characters long").optional(),
+  ),
+  NUDGE_TEST_CLOCK: z.preprocess(blankToUndefined, z.enum(["true", "false"]).default("false")),
+  VAPID_PUBLIC_KEY: optionalString,
+  VAPID_PRIVATE_KEY: optionalString,
+  VAPID_SUBJECT: optionalString,
 });
 
 export type AppEnvironment = "development" | "test" | "preview" | "production";
@@ -72,6 +95,21 @@ export interface Env {
   allowedEmails: ReadonlySet<string>;
   /** True only when the explicit flag is on AND the deployment is not production. */
   testLoginEnabled: boolean;
+  /** Which AI provider is used. "none" = AI off; "standin" = scripted test mode (never in production). */
+  aiProvider: "none" | "groq" | "mistral" | "openrouter" | "standin";
+  aiApiKey: string | undefined;
+  aiModel: string | undefined;
+  /** Per person, per calendar day in their time zone. */
+  aiDailyRequestLimit: number;
+  /** Shared secret the scheduler sends to the tick endpoint. Unset = the tick endpoint does not exist. */
+  nudgeTickSecret: string | undefined;
+  /**
+   * Lets the tick endpoint accept an "as of" time, for tests. True only when the flag is on AND
+   * the deployment is not production. Re-checked on every request (see nudgeTestClockAllowed).
+   */
+  nudgeTestClock: boolean;
+  /** Web push keys. Null unless all three are set. */
+  vapid: { publicKey: string; privateKey: string; subject: string } | null;
 }
 
 const APP_ENVIRONMENTS = ["development", "test", "preview", "production"] as const;
@@ -101,6 +139,15 @@ export function detectAppEnv(
     return source.VERCEL_ENV;
   }
   return source.NODE_ENV === "production" ? "production" : "development";
+}
+
+/**
+ * Re-checks, on every request, whether the tick endpoint may accept an "as of" time. It reads
+ * the raw environment, independently of the startup value, so a misconfiguration cannot slip
+ * through. Same three-guard idea as the test-only login (docs/contracts/foundation.md, section 9).
+ */
+export function nudgeTestClockAllowed(source: Record<string, string | undefined> = process.env) {
+  return source.NUDGE_TEST_CLOCK?.trim() === "true" && detectAppEnv(source) !== "production";
 }
 
 function resolveBaseUrl(parsed: z.infer<typeof schema>, appEnv: AppEnvironment): string | null {
@@ -173,6 +220,35 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     );
   }
 
+  const realProvider =
+    parsed.AI_PROVIDER === "groq" ||
+    parsed.AI_PROVIDER === "mistral" ||
+    parsed.AI_PROVIDER === "openrouter";
+  if (parsed.AI_PROVIDER === "standin" && appEnv === "production") {
+    problems.push("AI_PROVIDER: standin (scripted test mode) must not be used in production.");
+  }
+  if (realProvider && !parsed.AI_API_KEY) {
+    problems.push(`AI_PROVIDER: ${parsed.AI_PROVIDER} needs AI_API_KEY to be set.`);
+  }
+
+  const testClockRequested = parsed.NUDGE_TEST_CLOCK === "true";
+  if (testClockRequested && appEnv === "production") {
+    problems.push(
+      "NUDGE_TEST_CLOCK: must not be enabled in production. Remove it from this environment.",
+    );
+  }
+
+  const vapidKeys = [parsed.VAPID_PUBLIC_KEY, parsed.VAPID_PRIVATE_KEY, parsed.VAPID_SUBJECT];
+  const vapidSet = vapidKeys.filter((value) => value !== undefined).length;
+  if (vapidSet > 0 && vapidSet < 3) {
+    problems.push(
+      "VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT must be set together, or all left blank.",
+    );
+  }
+  if (parsed.VAPID_SUBJECT && !/^(mailto:|https:\/\/)/.test(parsed.VAPID_SUBJECT)) {
+    problems.push("VAPID_SUBJECT: must start with mailto: or https://");
+  }
+
   if (problems.length > 0) fail(problems);
 
   return {
@@ -186,6 +262,20 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     googleClientSecret: parsed.GOOGLE_CLIENT_SECRET,
     allowedEmails,
     testLoginEnabled: testLoginRequested && appEnv !== "production",
+    aiProvider: parsed.AI_PROVIDER,
+    aiApiKey: parsed.AI_API_KEY,
+    aiModel: parsed.AI_MODEL,
+    aiDailyRequestLimit: parsed.AI_DAILY_REQUEST_LIMIT,
+    nudgeTickSecret: parsed.NUDGE_TICK_SECRET,
+    nudgeTestClock: testClockRequested && appEnv !== "production",
+    vapid:
+      vapidSet === 3
+        ? {
+            publicKey: parsed.VAPID_PUBLIC_KEY as string,
+            privateKey: parsed.VAPID_PRIVATE_KEY as string,
+            subject: parsed.VAPID_SUBJECT as string,
+          }
+        : null,
   };
 }
 

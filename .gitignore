@@ -53,3 +53,6 @@ next-env.d.ts
 
 # browser-automation scratch output
 .playwright-mcp/
+
+# Playwright test support: temporary certificates and stub output
+/e2e/.tmp

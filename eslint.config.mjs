@@ -80,6 +80,10 @@ const eslintConfig = defineConfig([
     "drizzle/**",
     "agents/**",
     "assets/**",
+    // Playwright output (reports, traces, certificates): generated, not source.
+    "test-results/**",
+    "playwright-report/**",
+    "e2e/.tmp/**",
   ]),
 ]);
 

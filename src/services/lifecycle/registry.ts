@@ -1,6 +1,8 @@
 import "server-only";
 import type { ServiceContext } from "../context";
 import { coreLifecycleHandler } from "./core";
+import { aiLifecycleHandler } from "../ai/lifecycle";
+import { nudgesLifecycleHandler } from "../nudges/lifecycle";
 
 /**
  * THE data lifecycle registry: the single list every export and every account deletion
@@ -36,7 +38,11 @@ export interface LifecycleHandler {
 }
 
 /** Handlers in the order they run. Core is first; AI and Nudges append their own. */
-export const LIFECYCLE_HANDLERS: readonly LifecycleHandler[] = [coreLifecycleHandler];
+export const LIFECYCLE_HANDLERS: readonly LifecycleHandler[] = [
+  coreLifecycleHandler,
+  aiLifecycleHandler,
+  nudgesLifecycleHandler,
+];
 
 const SAFE_PATH = /^(?!\/)(?!.*(^|\/)\.\.(\/|$))[^\\\u0000]+$/;
 
